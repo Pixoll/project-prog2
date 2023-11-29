@@ -4,24 +4,25 @@ import udec.prog2.project.comidas.TipoComida;
 import udec.prog2.project.habitats.Habitat;
 import udec.prog2.project.habitats.TipoHabitat;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public abstract class Animal {
     private final TipoAnimal tipo;
     private final HashSet<TipoAnimal> animalesCompatibles;
     private final HashSet<TipoHabitat> habitatsCompatibles;
     private final HashSet<TipoComida> comidasCompatibles;
-    private Habitat habitat;
+    private final Habitat habitat;
+    private final int intervaloAlimentacion;
+    private long ultimaAlimentacion;
 
-    public Animal(TipoAnimal tipo) {
+    public Animal(TipoAnimal tipo, int intervaloAlimentacion, Habitat habitat) {
         this.tipo = tipo;
         this.animalesCompatibles = new HashSet<>();
         this.habitatsCompatibles = new HashSet<>();
         this.comidasCompatibles = new HashSet<>();
-        this.habitat = null;
+        this.habitat = habitat;
+        this.intervaloAlimentacion = intervaloAlimentacion;
+        this.ultimaAlimentacion = new Date().getTime();
     }
 
     public TipoAnimal getTipo() {
@@ -56,12 +57,30 @@ public abstract class Animal {
         return this.habitat;
     }
 
-    public void setHabitat(Habitat habitat) {
-        this.habitat = habitat;
+    public int getIntervaloAlimentacion() {
+        return this.intervaloAlimentacion;
     }
 
-    public boolean comerComida(TipoComida tipoComida) {
+    public boolean debeComer() {
+        return new Date().getTime() - this.ultimaAlimentacion >= this.intervaloAlimentacion;
+    }
+
+    public boolean comerComida() {
         if (this.habitat == null) return false;
-        return this.habitat.consumirComida(tipoComida);
+
+        final int cantidadComidas = this.comidasCompatibles.size();
+        final ArrayList<TipoComida> tipoComidas = new ArrayList<>();
+        Collections.addAll(tipoComidas, this.comidasCompatibles.toArray(new TipoComida[cantidadComidas]));
+        Collections.shuffle(tipoComidas);
+
+        boolean puedeComer = false;
+        for (TipoComida tipoComida : tipoComidas) {
+            puedeComer = this.habitat.consumirComida(tipoComida);
+            if (puedeComer) break;
+        }
+        if (!puedeComer) return false;
+
+        this.ultimaAlimentacion = new Date().getTime();
+        return true;
     }
 }

@@ -1,5 +1,7 @@
 package udec.prog2.project.animales;
 
+import udec.prog2.project.habitats.Habitat;
+
 public enum TipoAnimal {
     JIRAFA(Jirafa.class),
     LEON(Leon.class),
@@ -17,9 +19,9 @@ public enum TipoAnimal {
         this.clase = clase;
     }
 
-    public Animal crearAnimal() {
+    public Animal crearAnimal(Habitat habitat) {
         try {
-            return this.clase.getDeclaredConstructor().newInstance();
+            return this.clase.getDeclaredConstructor(Habitat.class).newInstance(habitat);
         } catch (Exception ignored) {
         }
         return null;

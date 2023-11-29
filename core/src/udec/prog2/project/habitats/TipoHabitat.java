@@ -14,9 +14,9 @@ public enum TipoHabitat {
         this.clase = clase;
     }
 
-    public Habitat crearHabitat() {
+    public Habitat crearHabitat(int maxAnimales) {
         try {
-            return this.clase.getDeclaredConstructor().newInstance();
+            return this.clase.getDeclaredConstructor(Integer.class).newInstance(maxAnimales);
         } catch (Exception ignored) {
         }
         return null;

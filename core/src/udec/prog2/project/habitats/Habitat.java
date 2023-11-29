@@ -71,14 +71,13 @@ public abstract class Habitat {
         if (!this.animalesCompatibles.contains(tipoAnimal)
                 || this.animales.size() == this.maxAnimales) return false;
 
-        final Animal animal = tipoAnimal.crearAnimal();
+        final Animal animal = tipoAnimal.crearAnimal(this);
         if (animal == null) {
             // TODO throw
             return false;
         }
 
         this.animales.add(animal);
-        animal.setHabitat(this);
         return true;
     }
 
