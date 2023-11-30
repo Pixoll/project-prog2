@@ -1,22 +1,26 @@
 package udec.prog2.project.animales;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import udec.prog2.project.habitats.Habitat;
 
 public enum TipoAnimal {
-    JIRAFA(Jirafa.class),
-    LEON(Leon.class),
-    MONO(Mono.class),
-    ORCA(Orca.class),
-    OSO_PARDO(OsoPardo.class),
-    OSO_POLAR(OsoPolar.class),
-    PINGUINO(Pinguino.class),
-    TIGRE(Tigre.class),
-    ZORRO(Zorro.class);
+    JIRAFA(Jirafa.class, "jirafa.png"),
+    LEON(Leon.class, "leon.png"),
+    MONO(Mono.class, "mono.png"),
+    ORCA(Orca.class, "orca.png"),
+    OSO_PARDO(OsoPardo.class, "oso_pardo.png"),
+    OSO_POLAR(OsoPolar.class, "oso_polar.png"),
+    PINGUINO(Pinguino.class, "pinguino.png"),
+    TIGRE(Tigre.class, "tigre.png"),
+    ZORRO(Zorro.class, "zorro.png");
 
     private final Class<? extends Animal> clase;
+    private final Texture textura;
 
-    TipoAnimal(Class<? extends Animal> clase) {
+    TipoAnimal(Class<? extends Animal> clase, String archivoTextura) {
         this.clase = clase;
+        this.textura = new Texture(Gdx.files.internal(archivoTextura));
     }
 
     public Animal crearAnimal(Habitat habitat) {
@@ -25,5 +29,9 @@ public enum TipoAnimal {
         } catch (Exception ignored) {
         }
         return null;
+    }
+
+    public Texture getTextura() {
+        return this.textura;
     }
 }

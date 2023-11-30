@@ -67,6 +67,10 @@ public abstract class Habitat {
         return consumioComida;
     }
 
+    public List<Animal> getAnimales() {
+        return Collections.unmodifiableList(this.animales);
+    }
+
     public boolean addAnimal(TipoAnimal tipoAnimal) {
         if (!this.animalesCompatibles.contains(tipoAnimal)
                 || this.animales.size() == this.maxAnimales) return false;
