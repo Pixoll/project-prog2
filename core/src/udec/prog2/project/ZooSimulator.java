@@ -12,7 +12,7 @@ public class ZooSimulator extends Game {
 
     public void create() {
         this.batch = new CustomSpriteBatch();
-        this.generadorFuente = new FreeTypeFontGenerator(Gdx.files.internal("PixeloidSans.ttf"));
+        this.generadorFuente = new FreeTypeFontGenerator(Gdx.files.internal("otros/PixeloidSans.ttf"));
 
         this.setScreen(new MainMenuScreen(this));
     }

@@ -4,17 +4,17 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 
 public enum TipoComida {
-    BERRIES(Berries.class, "berries.png"),
-    CALAMAR(Calamar.class, "calamar.png"),
-    CONEJO(Conejo.class, "conejo.png"),
-    FOCA(Foca.class, "foca.png"),
-    FRUTAS(Frutas.class, "frutas.png"),
-    KRILL(Krill.class, "krill.png"),
-    POLLO(Pollo.class, "pollo.png"),
-    RES(Res.class, "res.png"),
-    SALMON(Salmon.class, "salmon.png"),
-    SARDINAS(Sardinas.class, "sardinas.png"),
-    VEGETALES(Vegetales.class, "vegetales.png");
+    BERRIES(Berries.class, "comidas/berries.png"),
+    CALAMAR(Calamar.class, "comidas/calamar.png"),
+    CONEJO(Conejo.class, "comidas/conejo.png"),
+    FOCA(Foca.class, "comidas/foca.png"),
+    FRUTAS(Frutas.class, "comidas/frutas.png"),
+    KRILL(Krill.class, "comidas/krill.png"),
+    POLLO(Pollo.class, "comidas/pollo.png"),
+    RES(Res.class, "comidas/res.png"),
+    SALMON(Salmon.class, "comidas/salmon.png"),
+    SARDINAS(Sardinas.class, "comidas/sardinas.png"),
+    VEGETALES(Vegetales.class, "comidas/vegetales.png");
 
     private final Class<? extends Comida> clase;
     private final Texture textura;

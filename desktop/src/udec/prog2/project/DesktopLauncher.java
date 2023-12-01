@@ -12,7 +12,7 @@ public class DesktopLauncher {
         config.setForegroundFPS(120);
         config.setTitle("Zoo Simulator");
         config.setMaximized(true);
-        config.setWindowIcon("icono.png");
+        config.setWindowIcon("otros/icono.png");
         new Lwjgl3Application(new ZooSimulator(), config);
     }
 }

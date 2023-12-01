@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.TimeUtils;
 
 public class MainMenuScreen implements Screen {
     private final ZooSimulator juego;
@@ -20,6 +21,8 @@ public class MainMenuScreen implements Screen {
     private final BitmapFont fuente;
     private final Texture imagenFondo;
     private final Rectangle bordesFondo;
+    private long timerTextoAnimacion;
+    private String textoAnimacion;
 
     public MainMenuScreen(ZooSimulator juego) {
         this.juego = juego;
@@ -27,8 +30,8 @@ public class MainMenuScreen implements Screen {
         this.camara = new OrthographicCamera();
         this.camara.setToOrtho(false, ZooSimulator.WIDTH, ZooSimulator.HEIGHT);
 
-        this.imagenTitulo = new Texture(Gdx.files.internal("titulo.png"));
-        this.imagenFondo = new Texture(Gdx.files.internal("pasto.png"));
+        this.imagenTitulo = new Texture(Gdx.files.internal("otros/titulo.png"));
+        this.imagenFondo = new Texture(Gdx.files.internal("otros/pasto.png"));
 
         this.bordesFondo = new Rectangle();
         final float escalaFondo = (float) ZooSimulator.WIDTH / this.imagenFondo.getWidth();
@@ -52,6 +55,9 @@ public class MainMenuScreen implements Screen {
         configFuente.borderColor = new Color(0, 0, 0, 1);
         configFuente.borderWidth = 3;
         this.fuente = this.juego.generadorFuente.generateFont(configFuente);
+
+        this.timerTextoAnimacion = 0;
+        this.textoAnimacion = ">> Haz click para iniciar <<";
     }
 
     @Override
@@ -64,9 +70,19 @@ public class MainMenuScreen implements Screen {
         this.juego.batch.begin();
         this.juego.batch.draw(this.imagenFondo, this.bordesFondo);
         this.juego.batch.draw(this.imagenTitulo, this.bordesTitulo);
-        this.fuente.draw(this.juego.batch, ">> Haz click para iniciar <<",
+
+        if (TimeUtils.timeSinceMillis(this.timerTextoAnimacion) >= 500) {
+            this.textoAnimacion = this.textoAnimacion.equals(">> Haz click para iniciar <<")
+                    ? "Haz click para iniciar"
+                    : ">> Haz click para iniciar <<";
+
+            this.timerTextoAnimacion = TimeUtils.millis();
+        }
+
+        this.fuente.draw(this.juego.batch, this.textoAnimacion,
                 this.bordesTextoInicio.x, this.bordesTextoInicio.y, this.bordesTextoInicio.width,
                 Align.center, false);
+
         this.juego.batch.end();
 
         if (Gdx.input.isTouched()) {
