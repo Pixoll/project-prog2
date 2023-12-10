@@ -3,6 +3,7 @@ package udec.prog2.project.animales;
 import udec.prog2.project.comidas.TipoComida;
 import udec.prog2.project.habitats.Habitat;
 import udec.prog2.project.habitats.TipoHabitat;
+import udec.prog2.project.util.Util;
 
 import java.util.*;
 
@@ -22,7 +23,7 @@ public abstract class Animal {
         this.comidasCompatibles = new HashSet<>();
         this.habitat = habitat;
         this.intervaloAlimentacion = intervaloAlimentacion;
-        this.ultimaAlimentacion = new Date().getTime();
+        this.ultimaAlimentacion = 0;
     }
 
     public TipoAnimal getTipo() {
@@ -61,12 +62,12 @@ public abstract class Animal {
         return this.intervaloAlimentacion;
     }
 
-    public boolean debeComer() {
+    public boolean tieneHambre() {
         return new Date().getTime() - this.ultimaAlimentacion >= this.intervaloAlimentacion;
     }
 
     public boolean comerComida() {
-        if (this.habitat == null) return false;
+        if (this.habitat == null || !this.tieneHambre()) return false;
 
         final int cantidadComidas = this.comidasCompatibles.size();
         final ArrayList<TipoComida> tipoComidas = new ArrayList<>();
@@ -81,6 +82,8 @@ public abstract class Animal {
         if (!puedeComer) return false;
 
         this.ultimaAlimentacion = new Date().getTime();
+        Util.setTimeout(this::comerComida, this.intervaloAlimentacion);
+
         return true;
     }
 }

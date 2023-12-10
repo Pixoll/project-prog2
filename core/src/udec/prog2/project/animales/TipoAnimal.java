@@ -29,7 +29,8 @@ public enum TipoAnimal {
     public Animal crearAnimal(Habitat habitat) {
         try {
             return this.clase.getDeclaredConstructor(Habitat.class).newInstance(habitat);
-        } catch (Exception ignored) {
+        } catch (Exception error) {
+            error.printStackTrace();
         }
         return null;
     }

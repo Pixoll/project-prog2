@@ -22,10 +22,11 @@ public enum TipoHabitat {
         this.texturaIcono = new Textura(archivoTexturaIcono);
     }
 
-    public Habitat crearHabitat(int maxAnimales) {
+    public Habitat crearHabitat() {
         try {
-            return this.clase.getDeclaredConstructor(int.class).newInstance(maxAnimales);
-        } catch (Exception ignored) {
+            return this.clase.getDeclaredConstructor().newInstance();
+        } catch (Exception error) {
+            error.printStackTrace();
         }
         return null;
     }

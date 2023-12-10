@@ -28,7 +28,8 @@ public enum TipoComida {
     public Comida crearComida() {
         try {
             return this.clase.getDeclaredConstructor().newInstance();
-        } catch (Exception ignored) {
+        } catch (Exception error) {
+            error.printStackTrace();
         }
         return null;
     }

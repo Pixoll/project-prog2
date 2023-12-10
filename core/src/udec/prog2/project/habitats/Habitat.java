@@ -46,12 +46,11 @@ public abstract class Habitat {
         if (!esCompatible) return false;
 
         final Comida comida = tipoComida.crearComida();
-        if (comida == null) {
-            // TODO throw
-            return false;
-        }
+        if (comida == null) return false;
 
         this.depositoComida.add(comida);
+        this.animales.forEach(Animal::comerComida);
+
         return true;
     }
 
@@ -71,15 +70,15 @@ public abstract class Habitat {
         return Collections.unmodifiableList(this.animales);
     }
 
+    public boolean isFull() {
+        return this.animales.size() == this.maxAnimales;
+    }
+
     public boolean addAnimal(TipoAnimal tipoAnimal) {
-        if (!this.animalesCompatibles.contains(tipoAnimal)
-                || this.animales.size() == this.maxAnimales) return false;
+        if (!this.animalesCompatibles.contains(tipoAnimal) || this.isFull()) return false;
 
         final Animal animal = tipoAnimal.crearAnimal(this);
-        if (animal == null) {
-            // TODO throw
-            return false;
-        }
+        if (animal == null) return false;
 
         this.animales.add(animal);
         return true;
