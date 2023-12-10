@@ -1,52 +1,34 @@
 package udec.prog2.project.screens;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Align;
 import udec.prog2.project.ZooSimulator;
+import udec.prog2.project.animales.Animal;
 import udec.prog2.project.comidas.TipoComida;
-import udec.prog2.project.util.Rectangulo;
+import udec.prog2.project.habitats.Habitat;
 
-public class MenuComidaScreen extends MenuScreen {
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public class MenuComidaScreen extends MenuScreen<TipoComida> {
     public MenuComidaScreen(ZooSimulator juego, JuegoScreen juegoScreen) {
-        super(juego, juegoScreen, "Comprar Comida", TipoComida.values(), TipoComida::getTextura);
+        super(juego, juegoScreen, "Comprar Comida",
+                TipoComida.values(), TipoComida::getTextura, TipoComida::getNombre);
     }
 
     @Override
     public boolean draw(Vector2 mousePos, boolean ignorarClick) {
         if (!super.draw(mousePos, ignorarClick)) return false;
 
-        final int cantidadComidas = TipoComida.values().length;
+        Habitat habitatSeleccionado = this.juegoScreen.getHabitatSeleccionado();
+        final List<Animal> animalesEnHabitat = habitatSeleccionado.getAnimales();
 
-        this.juego.batch.begin();
-        for (TipoComida tipoComida : TipoComida.values()) {
-            this.juego.batch.draw(tipoComida.getTextura());
+        final Set<TipoComida> comidasSeleccionables = new HashSet<>();
+        for (Animal animal : animalesEnHabitat) {
+            comidasSeleccionables.addAll(animal.getComidasCompatibles());
         }
-        for (int i = 0; i < cantidadComidas; i++) {
-            final Rectangulo bordeTituloComida = this.bordesTituloTipo[i];
-            this.fuenteTituloTipo.draw(this.juego.batch, TipoComida.values()[i].getNombre(),
-                    bordeTituloComida.x, bordeTituloComida.y, bordeTituloComida.width,
-                    Align.center, false);
-        }
-        this.juego.batch.end();
 
-        final boolean click = Gdx.input.justTouched();
-        TipoComida tipoComidaSeleccionado = null;
-
-        this.juego.shape.begin();
-        this.juego.shape.setColor(this.colorSeleccionarTipo);
-        for (int i = 0; i < cantidadComidas; i++) {
-            final Rectangulo bordeTipoComida = this.bordesTipo[i];
-            if (!bordeTipoComida.contains(mousePos)) continue;
-
-            this.juego.shape.rect(bordeTipoComida, this.seleccionarTipoHoverWidth);
-
-            if (!ignorarClick && click) {
-                tipoComidaSeleccionado = TipoComida.values()[i];
-            }
-        }
-        this.juego.shape.end();
-
-        return tipoComidaSeleccionado == null;
+        TipoComida tipoSeleccionado = this.seleccionarTipo(mousePos, ignorarClick, comidasSeleccionables);
+        return tipoSeleccionado == null;
     }
 }

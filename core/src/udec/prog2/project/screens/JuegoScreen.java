@@ -25,9 +25,9 @@ public class JuegoScreen implements Screen {
     private static final int FILAS_HABITATS = 3;
     private static final int COLUMANS_HABITATS = 4;
     private final ZooSimulator juego;
-    private final MenuScreen menuHabitatScreen;
-    private final MenuScreen menuAnimalesScreen;
-    private final MenuScreen menuComidaScreen;
+    private final MenuHabitatScreen menuHabitatScreen;
+    private final MenuAnimalesScreen menuAnimalesScreen;
+    private final MenuComidaScreen menuComidaScreen;
     private final Rectangulo bordesFondoTile;
     private final Textura texturaMenuSide;
     private final ArrayList<Rectangle> bordesBotonesMenuSide;

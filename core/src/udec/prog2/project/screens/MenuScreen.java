@@ -10,21 +10,19 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
 import udec.prog2.project.ZooSimulator;
+import udec.prog2.project.util.GrayscaleShader;
 import udec.prog2.project.util.Rectangulo;
 import udec.prog2.project.util.Textura;
 import udec.prog2.project.util.Util;
 
+import java.util.Set;
 import java.util.function.Function;
 
-public class MenuScreen {
+public class MenuScreen<T> {
     protected final ZooSimulator juego;
     protected final JuegoScreen juegoScreen;
     protected final Rectangulo bordesContenidos;
-    protected final BitmapFont fuenteTituloTipo;
-    protected final Rectangulo[] bordesTituloTipo;
-    protected final Color colorSeleccionarTipo;
-    protected final float seleccionarTipoHoverWidth;
-    protected final Rectangulo[] bordesTipo;
+    protected final T[] tipos;
     private final Rectangulo bordesMenu;
     private final Texture texturaMenu;
     private final Color colorFondo;
@@ -33,11 +31,24 @@ public class MenuScreen {
     private final BitmapFont fuenteTituloMenu;
     private final Rectangle bordesTituloMenu;
     private final Color colorFondoContenidos;
+    private final Function<T, Textura> tipoTexturaGetter;
+    private final Function<T, String> tipoNombreGetter;
+    private final Rectangulo[] bordesTipo;
+    private final BitmapFont fuenteTituloTipo;
+    private final Rectangulo[] bordesTituloTipo;
+    private final Color colorTipoSeleccionable;
+    private final Color colorTipoNoSeleccionable;
+    private final float seleccionarTipoHoverWidth;
 
-    public <T> MenuScreen(ZooSimulator juego, JuegoScreen juegoScreen, String tituloMenu, T[] tipos, Function<T, Textura> texturaGetter) {
+    public MenuScreen(ZooSimulator juego, JuegoScreen juegoScreen, String tituloMenu,
+                      T[] tipos, Function<T, Textura> tipoTexturaGetter, Function<T, String> tipoNombreGetter) {
         this.juego = juego;
         this.juegoScreen = juegoScreen;
         this.tituloMenu = tituloMenu;
+        this.tipos = tipos;
+        this.tipoTexturaGetter = tipoTexturaGetter;
+        this.tipoNombreGetter = tipoNombreGetter;
+
         this.texturaMenu = new Texture(Gdx.files.internal("otros/menu.png"));
 
         final float escalaMenu = 0.75f;
@@ -102,7 +113,7 @@ public class MenuScreen {
                 final int k = i * columnas + j;
                 if (k >= cantidadTipos) continue;
 
-                final Textura texturaTipo = texturaGetter.apply(tipos[k]);
+                final Textura texturaTipo = tipoTexturaGetter.apply(tipos[k]);
                 texturaTipo.bordes.set(bordesIconoTipo);
 
                 texturaTipo.bordes.x += j * bordeTipo.width;
@@ -133,7 +144,8 @@ public class MenuScreen {
             }
         }
 
-        this.colorSeleccionarTipo = Util.color("#689a24");
+        this.colorTipoSeleccionable = Util.color("#689a24");
+        this.colorTipoNoSeleccionable = Util.color("#9a4e3c");
         this.seleccionarTipoHoverWidth = bordeTipo.width * 0.025f;
     }
 
@@ -167,6 +179,50 @@ public class MenuScreen {
         Gdx.gl20.glDisable(GL20.GL_BLEND);
 
         return true;
+    }
+
+    protected T seleccionarTipo(Vector2 mousePos, boolean ignorarClick, Set<T> seleccionables) {
+        final int cantidadTipos = this.tipos.length;
+
+        this.juego.batch.begin();
+        for (T tipo : this.tipos) {
+            if (seleccionables != null && !seleccionables.contains(tipo))
+                this.juego.batch.setShader(GrayscaleShader.grayscaleShader);
+            this.juego.batch.draw(this.tipoTexturaGetter.apply(tipo));
+            if (seleccionables != null && !seleccionables.contains(tipo)) this.juego.batch.setShader(null);
+        }
+        for (int i = 0; i < cantidadTipos; i++) {
+            final Rectangulo bordeTituloTipo = this.bordesTituloTipo[i];
+            this.fuenteTituloTipo.draw(this.juego.batch, this.tipoNombreGetter.apply(this.tipos[i]),
+                    bordeTituloTipo.x, bordeTituloTipo.y, bordeTituloTipo.width,
+                    Align.center, false);
+        }
+        this.juego.batch.end();
+
+        final boolean click = Gdx.input.justTouched();
+        T tipoSeleccionado = null;
+
+        this.juego.shape.begin();
+        for (int i = 0; i < cantidadTipos; i++) {
+            final Rectangulo bordeTipo = this.bordesTipo[i];
+            if (!bordeTipo.contains(mousePos)) continue;
+
+            final boolean seleccionable = !(seleccionables != null && !seleccionables.contains(this.tipos[i]));
+            this.juego.shape.setColor(seleccionables != null && !seleccionables.contains(this.tipos[i])
+                    ? this.colorTipoNoSeleccionable : this.colorTipoSeleccionable);
+            this.juego.shape.rect(bordeTipo, this.seleccionarTipoHoverWidth);
+
+            if (seleccionable && !ignorarClick && click) {
+                tipoSeleccionado = this.tipos[i];
+            }
+        }
+        this.juego.shape.end();
+
+        return tipoSeleccionado;
+    }
+
+    protected T seleccionarTipo(Vector2 mousePos, boolean ignorarClick) {
+        return this.seleccionarTipo(mousePos, ignorarClick, null);
     }
 
     public void dispose() {
