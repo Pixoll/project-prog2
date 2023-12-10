@@ -6,6 +6,9 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import udec.prog2.project.animales.Animal;
+import udec.prog2.project.animales.TipoAnimal;
+import udec.prog2.project.comidas.TipoComida;
 import udec.prog2.project.habitats.TipoHabitat;
 import udec.prog2.project.util.Rectangulo;
 import udec.prog2.project.util.Textura;
@@ -23,7 +26,8 @@ public class JuegoScreen implements Screen {
     private static final int MENU_SIDE_REMOVER = 4;
     private static final int CANTIDAD_BOTONES_SIDE = 5;
     private static final int FILAS_HABITATS = 3;
-    private static final int COLUMANS_HABITATS = 4;
+    private static final int COLUMNAS_HABITATS = 4;
+    private static final int TOTAL_HABITATS = FILAS_HABITATS * COLUMNAS_HABITATS;
     private final ZooSimulator juego;
     private final MenuHabitatScreen menuHabitatScreen;
     private final MenuAnimalesScreen menuAnimalesScreen;
@@ -39,6 +43,8 @@ public class JuegoScreen implements Screen {
     private final Textura texturaFlecha;
     private int indexHabitatSeleccionado;
     private boolean acabaDeSeleccionarHabitat;
+    private final ArrayList<Textura>[] texturasAnimales;
+    private final Textura texturaIndicadorHambre;
 
     public JuegoScreen(ZooSimulator juego) {
         this.juego = juego;
@@ -86,12 +92,12 @@ public class JuegoScreen implements Screen {
         bordesHabitat.height = bordesSeccionHabitats.height / FILAS_HABITATS * 0.9f;
         bordesHabitat.width = bordesHabitat.height * 4 / 3;
 
-        final float xOffset = (bordesSeccionHabitats.width - bordesHabitat.width * COLUMANS_HABITATS) / (COLUMANS_HABITATS - 1);
+        final float xOffset = (bordesSeccionHabitats.width - bordesHabitat.width * COLUMNAS_HABITATS) / (COLUMNAS_HABITATS - 1);
         final float yOffset = (bordesSeccionHabitats.height - bordesHabitat.height * FILAS_HABITATS) / (FILAS_HABITATS - 1);
 
         this.texturasHabitats = new ArrayList<>();
         for (int i = 0; i < FILAS_HABITATS; i++) {
-            for (int j = 0; j < COLUMANS_HABITATS; j++) {
+            for (int j = 0; j < COLUMNAS_HABITATS; j++) {
                 final Textura texturaHabitat = new Textura("habitats/vacio.png");
                 texturaHabitat.bordes.set(bordesHabitat);
                 texturaHabitat.bordes.x += (bordesHabitat.width + xOffset) * j;
@@ -100,10 +106,19 @@ public class JuegoScreen implements Screen {
             }
         }
 
-        this.habitats = new Habitat[FILAS_HABITATS * COLUMANS_HABITATS];
+        this.habitats = new Habitat[TOTAL_HABITATS];
         this.indexHabitatSeleccionado = -1;
         this.acabaDeSeleccionarHabitat = false;
         this.texturaFlecha = new Textura("ui/flecha.png");
+
+        this.texturasAnimales = new ArrayList[TOTAL_HABITATS];
+        for (int i = 0; i < TOTAL_HABITATS; i++) {
+            this.texturasAnimales[i] = new ArrayList<>();
+        }
+
+        this.texturaIndicadorHambre = new Textura("ui/hambre.png");
+        this.texturaIndicadorHambre.bordes
+                .scaleBy((bordesHabitat.height / this.texturaIndicadorHambre.bordes.height) * 0.2f);
     }
 
     @Override
@@ -122,8 +137,23 @@ public class JuegoScreen implements Screen {
         }
         this.juego.batch.draw(this.texturaMenuSide);
         // Habitats
-        for (Textura texturaHabitat : this.texturasHabitats) {
-            this.juego.batch.draw(texturaHabitat);
+        this.texturasHabitats.forEach(this.juego.batch::draw);
+        // Animales
+        for (int i = 0; i < TOTAL_HABITATS; i++) {
+            for (Textura texturaAnimal : this.texturasAnimales[i]) {
+                this.juego.batch.draw(texturaAnimal);
+
+                final int indexAnimal = this.texturasAnimales[i].indexOf(texturaAnimal);
+                final Animal animal = this.habitats[i].getAnimales().get(indexAnimal);
+                if (!animal.tieneHambre()) continue;
+
+                final Rectangulo bordesIndicadorHambre = this.texturaIndicadorHambre.bordes
+                        .setPosition(texturaAnimal.bordes);
+                bordesIndicadorHambre.x += (texturaAnimal.bordes.width - bordesIndicadorHambre.width) / 2;
+                bordesIndicadorHambre.y += texturaAnimal.bordes.height * 1.05f;
+
+                this.juego.batch.draw(texturaIndicadorHambre);
+            }
         }
         this.juego.batch.end();
 
@@ -184,6 +214,8 @@ public class JuegoScreen implements Screen {
         texturaHabitat.bordes.set(this.texturasHabitats.get(index).bordes);
         this.texturasHabitats.get(index).dispose();
         this.texturasHabitats.set(index, texturaHabitat);
+        this.texturasAnimales[index].forEach(Textura::dispose);
+        this.texturasAnimales[index].clear();
         return false;
     }
 
@@ -215,7 +247,9 @@ public class JuegoScreen implements Screen {
 
     public void crearHabitat(TipoHabitat tipo) {
         final int index = this.indexHabitatSeleccionado;
-        this.habitats[index] = tipo.crearHabitat(3);
+        this.habitats[index] = tipo.crearHabitat();
+        if (this.habitats[index] == null) return;
+
         Textura texturaHabitat = tipo.getTextura().clonar();
         texturaHabitat.bordes.set(this.texturasHabitats.get(index).bordes);
         this.texturasHabitats.get(index).dispose();
@@ -225,6 +259,26 @@ public class JuegoScreen implements Screen {
     public Habitat getHabitatSeleccionado() {
         if (this.indexHabitatSeleccionado == -1) return null;
         return this.habitats[this.indexHabitatSeleccionado];
+    }
+
+    public void addAnimalToHabitat(TipoAnimal tipo) {
+        final int index = this.indexHabitatSeleccionado;
+        boolean success = this.habitats[index].addAnimal(tipo);
+        if (!success) return;
+
+        final Rectangulo bordesHabitat = this.texturasHabitats.get(index).bordes;
+        Textura texturaAnimal = tipo.getTextura().clonar();
+        texturaAnimal.bordes.setPosition(bordesHabitat.getCenter(new Vector2()))
+                .scaleBy((bordesHabitat.height / texturaAnimal.bordes.height) * 0.25f, false);
+        texturaAnimal.bordes.x -= texturaAnimal.bordes.width / 2;
+        texturaAnimal.bordes.y -= texturaAnimal.bordes.height / 2;
+        this.texturasAnimales[index].add(texturaAnimal);
+    }
+
+    public void addComidaToHabitat(TipoComida tipo) {
+        final int index = this.indexHabitatSeleccionado;
+        boolean success = this.habitats[index].depositarComida(tipo);
+        if (!success) return;
     }
 
     private void drawFlecha(int indexHabitat) {
@@ -272,5 +326,9 @@ public class JuegoScreen implements Screen {
         this.menuComidaScreen.dispose();
         this.menuAnimalesScreen.dispose();
         this.menuHabitatScreen.dispose();
+        for (int i = 0; i < TOTAL_HABITATS; i++) {
+            this.texturasAnimales[i].forEach(Textura::dispose);
+        }
+        this.texturaIndicadorHambre.dispose();
     }
 }

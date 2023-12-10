@@ -1,6 +1,7 @@
 package udec.prog2.project.util;
 
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 
 public class Rectangulo extends Rectangle {
     public Rectangulo(float width, float height) {
@@ -16,12 +17,29 @@ public class Rectangulo extends Rectangle {
         return (Rectangulo) super.set(rect);
     }
 
-    public Rectangulo scaleBy(float scale) {
+    @Override
+    public Rectangulo setPosition(Vector2 position) {
+        return (Rectangulo) super.setPosition(position);
+    }
+
+    public Rectangulo setPosition(Rectangulo rectangulo) {
+        this.x = rectangulo.x;
+        this.y = rectangulo.y;
+        return this;
+    }
+
+    public Rectangulo scaleBy(float scale, boolean scaleCoords) {
         this.width *= scale;
         this.height *= scale;
-        this.x *= scale;
-        this.y *= scale;
+        if (scaleCoords) {
+            this.x *= scale;
+            this.y *= scale;
+        }
         return this;
+    }
+
+    public Rectangulo scaleBy(float scale) {
+        return this.scaleBy(scale, true);
     }
 
     public Rectangulo toSquare() {

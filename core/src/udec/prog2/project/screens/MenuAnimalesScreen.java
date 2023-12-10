@@ -21,30 +21,33 @@ public class MenuAnimalesScreen extends MenuScreen<TipoAnimal> {
         if (!super.draw(mousePos, ignorarClick)) return false;
 
         Habitat habitatSeleccionado = this.juegoScreen.getHabitatSeleccionado();
-        final Set<TipoAnimal> animalesCompatibles = habitatSeleccionado.getAnimalesCompatibles();
-        final List<Animal> animalesEnHabitat = habitatSeleccionado.getAnimales();
+        final Set<TipoAnimal> animalesSeleccionables = new HashSet<>();
 
-        final HashSet<TipoAnimal> animalesIncompatibles = new HashSet<>();
-        for (Animal animal1 : animalesEnHabitat) {
-            for (Animal animal2 : animalesEnHabitat) {
-                if (animal2.getTipo() == animal1.getTipo()) continue;
-                if (!animal1.getAnimalesCompatibles().contains(animal2.getTipo())) continue;
-                animalesIncompatibles.add(animal2.getTipo());
+        if (!habitatSeleccionado.isFull()) {
+            final Set<TipoAnimal> animalesCompatibles = habitatSeleccionado.getAnimalesCompatibles();
+            final List<Animal> animalesEnHabitat = habitatSeleccionado.getAnimales();
+
+            final HashSet<TipoAnimal> animalesIncompatibles = new HashSet<>();
+            for (Animal animal1 : animalesEnHabitat) {
+                for (TipoAnimal tipoAnimal2 : animalesCompatibles) {
+                    if (tipoAnimal2 == animal1.getTipo()) continue;
+                    if (animal1.getAnimalesCompatibles().contains(tipoAnimal2)) continue;
+                    animalesIncompatibles.add(tipoAnimal2);
+                }
+            }
+
+            for (TipoAnimal animal : animalesCompatibles) {
+                if (animalesIncompatibles.contains(animal)) continue;
+                animalesSeleccionables.add(animal);
             }
         }
 
-        final Set<TipoAnimal> animalesSeleccionables = new HashSet<>();
-        for (TipoAnimal animal : animalesCompatibles) {
-            if (animalesIncompatibles.contains(animal)) continue;
-            animalesSeleccionables.add(animal);
+        TipoAnimal tipoSeleccionado = this.seleccionarTipo(mousePos, ignorarClick, animalesSeleccionables);
+        if (tipoSeleccionado != null) {
+            this.juegoScreen.addAnimalToHabitat(tipoSeleccionado);
+            return false;
         }
 
-        TipoAnimal tipoSeleccionado = this.seleccionarTipo(mousePos, ignorarClick, animalesSeleccionables);
-        return tipoSeleccionado == null;
-    }
-
-    @Override
-    public void dispose() {
-        super.dispose();
+        return true;
     }
 }

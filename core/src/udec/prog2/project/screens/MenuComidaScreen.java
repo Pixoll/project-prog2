@@ -29,6 +29,11 @@ public class MenuComidaScreen extends MenuScreen<TipoComida> {
         }
 
         TipoComida tipoSeleccionado = this.seleccionarTipo(mousePos, ignorarClick, comidasSeleccionables);
-        return tipoSeleccionado == null;
+        if (tipoSeleccionado != null) {
+            this.juegoScreen.addComidaToHabitat(tipoSeleccionado);
+            return false;
+        }
+
+        return true;
     }
 }
