@@ -1,27 +1,28 @@
 package udec.prog2.project.comidas;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
+import udec.prog2.project.util.Textura;
 
 public enum TipoComida {
-    BERRIES(Berries.class, "comidas/berries.png"),
-    CALAMAR(Calamar.class, "comidas/calamar.png"),
-    CONEJO(Conejo.class, "comidas/conejo.png"),
-    FOCA(Foca.class, "comidas/foca.png"),
-    FRUTAS(Frutas.class, "comidas/frutas.png"),
-    KRILL(Krill.class, "comidas/krill.png"),
-    POLLO(Pollo.class, "comidas/pollo.png"),
-    RES(Res.class, "comidas/res.png"),
-    SALMON(Salmon.class, "comidas/salmon.png"),
-    SARDINAS(Sardinas.class, "comidas/sardinas.png"),
-    VEGETALES(Vegetales.class, "comidas/vegetales.png");
+    BERRIES(Berries.class, "Berries", "comidas/berries.png"),
+    CALAMAR(Calamar.class, "Calamar", "comidas/calamar.png"),
+    CONEJO(Conejo.class, "Conejo", "comidas/conejo.png"),
+    FOCA(Foca.class, "Foca", "comidas/foca.png"),
+    FRUTAS(Frutas.class, "Frutas", "comidas/frutas.png"),
+    KRILL(Krill.class, "Krill", "comidas/krill.png"),
+    POLLO(Pollo.class, "Pollo", "comidas/pollo.png"),
+    RES(Res.class, "Res", "comidas/res.png"),
+    SALMON(Salmon.class, "Salmon", "comidas/salmon.png"),
+    SARDINAS(Sardinas.class, "Sardinas", "comidas/sardinas.png"),
+    VEGETALES(Vegetales.class, "Vegetales", "comidas/vegetales.png");
 
     private final Class<? extends Comida> clase;
-    private final Texture textura;
+    private final String nombre;
+    private final Textura textura;
 
-    TipoComida(Class<? extends Comida> clase, String archivoTextura) {
+    TipoComida(Class<? extends Comida> clase, String nombre, String archivoTextura) {
         this.clase = clase;
-        this.textura = new Texture(Gdx.files.internal(archivoTextura));
+        this.nombre = nombre;
+        this.textura = new Textura(archivoTextura);
     }
 
     public Comida crearComida() {
@@ -32,7 +33,11 @@ public enum TipoComida {
         return null;
     }
 
-    public Texture getTextura() {
+    public String getNombre() {
+        return this.nombre;
+    }
+
+    public Textura getTextura() {
         return this.textura;
     }
 }
