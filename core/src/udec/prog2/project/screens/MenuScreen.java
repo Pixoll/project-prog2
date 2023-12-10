@@ -49,7 +49,7 @@ public class MenuScreen<T> {
         this.tipoTexturaGetter = tipoTexturaGetter;
         this.tipoNombreGetter = tipoNombreGetter;
 
-        this.texturaMenu = new Texture(Gdx.files.internal("otros/menu.png"));
+        this.texturaMenu = new Texture(Gdx.files.internal("ui/menu.png"));
 
         final float escalaMenu = 0.75f;
         this.bordesMenu = new Rectangulo(this.texturaMenu.getWidth(), this.texturaMenu.getHeight()).scaleBy(escalaMenu);
