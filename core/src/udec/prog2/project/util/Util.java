@@ -1,4 +1,4 @@
-package udec.prog2.project;
+package udec.prog2.project.util;
 
 import com.badlogic.gdx.graphics.Color;
 

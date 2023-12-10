@@ -1,58 +1,50 @@
-package udec.prog2.project;
+package udec.prog2.project.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
+import udec.prog2.project.util.Rectangulo;
+import udec.prog2.project.util.Textura;
+import udec.prog2.project.util.Util;
+import udec.prog2.project.ZooSimulator;
 
-public class MainMenuScreen implements Screen {
+public class MenuPrincipalScreen implements Screen {
     private final ZooSimulator juego;
-    private final Texture imagenTitulo;
-    private final Rectangle bordesTitulo;
+    private final Textura texturaTitulo;
     private final Rectangle bordesTextoInicio;
-    private final OrthographicCamera camara;
     private final BitmapFont fuente;
-    private final Texture imagenFondo;
-    private final Rectangle bordesFondo;
+    private final Rectangulo bordesFondo;
     private long timerTextoAnimacion;
     private String textoAnimacion;
 
-    public MainMenuScreen(ZooSimulator juego) {
+    public MenuPrincipalScreen(ZooSimulator juego) {
         this.juego = juego;
 
-        this.camara = new OrthographicCamera();
-        this.camara.setToOrtho(false, ZooSimulator.WIDTH, ZooSimulator.HEIGHT);
+        this.texturaTitulo = new Textura("ui/titulo.png");
+        this.texturaTitulo.bordes.setPosition(
+                (ZooSimulator.WIDTH - this.texturaTitulo.getWidth()) / 2f,
+                (ZooSimulator.HEIGHT - this.texturaTitulo.getHeight()) * 0.7f
+        );
 
-        this.imagenTitulo = new Texture(Gdx.files.internal("otros/titulo.png"));
-        this.imagenFondo = new Texture(Gdx.files.internal("otros/pasto.png"));
-
-        this.bordesFondo = new Rectangle();
-        final float escalaFondo = (float) ZooSimulator.WIDTH / this.imagenFondo.getWidth();
-        this.bordesFondo.width = this.imagenFondo.getWidth() * escalaFondo;
-        this.bordesFondo.height = this.imagenFondo.getHeight() * escalaFondo;
+        this.bordesFondo = new Rectangulo(juego.texturaPasto.getWidth(), juego.texturaPasto.getHeight());
+        final float escalaFondo = (float) ZooSimulator.WIDTH / juego.texturaPasto.getWidth();
+        this.bordesFondo.scaleBy(escalaFondo);
         this.bordesFondo.y = ZooSimulator.HEIGHT - this.bordesFondo.height;
-
-        this.bordesTitulo = new Rectangle();
-        this.bordesTitulo.width = this.imagenTitulo.getWidth();
-        this.bordesTitulo.height = this.imagenTitulo.getHeight();
-        this.bordesTitulo.x = (ZooSimulator.WIDTH - this.bordesTitulo.width) / 2;
-        this.bordesTitulo.y = (ZooSimulator.HEIGHT - this.bordesTitulo.height) * 0.7f;
 
         this.bordesTextoInicio = new Rectangle();
         this.bordesTextoInicio.width = ZooSimulator.WIDTH / 2f;
         this.bordesTextoInicio.x = ZooSimulator.WIDTH / 4f;
         this.bordesTextoInicio.y = ZooSimulator.HEIGHT * 0.15f;
 
-        FreeTypeFontGenerator.FreeTypeFontParameter configFuente = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        FreeTypeFontParameter configFuente = new FreeTypeFontParameter();
         configFuente.size = 50;
-        configFuente.borderColor = new Color(0, 0, 0, 1);
+        configFuente.borderColor = Util.color("#000000");
         configFuente.borderWidth = 3;
         this.fuente = this.juego.generadorFuente.generateFont(configFuente);
 
@@ -62,14 +54,12 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(0, 0, 0.2f, 1);
-
-        this.camara.update();
-        this.juego.batch.setProjectionMatrix(camara.combined);
+        this.juego.camara.update();
+        this.juego.batch.setProjectionMatrix(juego.camara.combined);
 
         this.juego.batch.begin();
-        this.juego.batch.draw(this.imagenFondo, this.bordesFondo);
-        this.juego.batch.draw(this.imagenTitulo, this.bordesTitulo);
+        this.juego.batch.draw(this.juego.texturaPasto, this.bordesFondo);
+        this.juego.batch.draw(this.texturaTitulo);
 
         if (TimeUtils.timeSinceMillis(this.timerTextoAnimacion) >= 500) {
             this.textoAnimacion = this.textoAnimacion.equals(">> Haz click para iniciar <<")
@@ -86,7 +76,7 @@ public class MainMenuScreen implements Screen {
         this.juego.batch.end();
 
         if (Gdx.input.isTouched()) {
-            this.juego.setScreen(new GameScreen(this.juego));
+            this.juego.setScreen(new JuegoScreen(this.juego));
             this.dispose();
         }
     }
@@ -113,7 +103,7 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void dispose() {
-        this.imagenTitulo.dispose();
+        this.texturaTitulo.dispose();
         this.fuente.dispose();
     }
 }
