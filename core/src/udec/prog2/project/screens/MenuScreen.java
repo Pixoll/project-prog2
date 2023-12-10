@@ -15,18 +15,20 @@ import udec.prog2.project.util.Util;
 
 public class MenuScreen {
     protected final ZooSimulator juego;
+    protected final JuegoScreen juegoScreen;
     protected final Rectangulo bordesContenidos;
     private final Rectangulo bordesMenu;
     private final Texture texturaMenu;
     private final Color colorFondo;
     private final Rectangulo bordesCerrarMenu;
     private final String tituloMenu;
-    private final BitmapFont fuente;
+    private final BitmapFont fuenteTituloMenu;
     private final Rectangle bordesTituloMenu;
     private final Color colorFondoContenidos;
 
-    public MenuScreen(ZooSimulator juego, String tituloMenu) {
+    public MenuScreen(ZooSimulator juego, JuegoScreen juegoScreen, String tituloMenu) {
         this.juego = juego;
+        this.juegoScreen = juegoScreen;
         this.tituloMenu = tituloMenu;
         this.texturaMenu = new Texture(Gdx.files.internal("otros/menu.png"));
 
@@ -50,7 +52,7 @@ public class MenuScreen {
         configFuente.size = 30;
         configFuente.borderColor = this.colorFondo;
         configFuente.borderWidth = 2;
-        this.fuente = this.juego.generadorFuente.generateFont(configFuente);
+        this.fuenteTituloMenu = this.juego.generadorFuente.generateFont(configFuente);
 
         this.bordesTituloMenu = new Rectangle();
         this.bordesTituloMenu.width = ZooSimulator.WIDTH / 2f;
@@ -72,7 +74,7 @@ public class MenuScreen {
 
         this.juego.batch.begin();
         this.juego.batch.draw(this.texturaMenu, this.bordesMenu);
-        this.fuente.draw(this.juego.batch, this.tituloMenu,
+        this.fuenteTituloMenu.draw(this.juego.batch, this.tituloMenu,
                 this.bordesTituloMenu.x, this.bordesTituloMenu.y, this.bordesTituloMenu.width,
                 Align.center, false);
         this.juego.batch.end();
@@ -92,6 +94,6 @@ public class MenuScreen {
 
     public void dispose() {
         this.texturaMenu.dispose();
-        this.fuente.dispose();
+        this.fuenteTituloMenu.dispose();
     }
 }

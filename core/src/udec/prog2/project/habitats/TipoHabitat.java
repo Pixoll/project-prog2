@@ -3,8 +3,8 @@ package udec.prog2.project.habitats;
 import udec.prog2.project.util.Textura;
 
 public enum TipoHabitat {
+    ACUATICO(Acuatico.class, "Acuático", "habitats/acuatico.png", "habitats/acuatico_icono.png"),
     JUNGLA(Jungla.class, "Jungla", "habitats/jungla.png", "habitats/jungla_icono.png"),
-    ACUATICO(Acuatico.class, "Ártico", "habitats/acuatico.png", "habitats/acuatico_icono.png"),
     SABANA(Sabana.class, "Sabana", "habitats/sabana.png", "habitats/sabana_icono.png"),
     TAIGA(Taiga.class, "Taiga", "habitats/taiga.png", "habitats/taiga_icono.png"),
     TROPICAL(Tropical.class, "Tropical", "habitats/tropical.png", "habitats/tropical_icono.png"),
@@ -24,7 +24,7 @@ public enum TipoHabitat {
 
     public Habitat crearHabitat(int maxAnimales) {
         try {
-            return this.clase.getDeclaredConstructor(Integer.class).newInstance(maxAnimales);
+            return this.clase.getDeclaredConstructor(int.class).newInstance(maxAnimales);
         } catch (Exception ignored) {
         }
         return null;

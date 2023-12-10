@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import udec.prog2.project.habitats.TipoHabitat;
 import udec.prog2.project.util.Rectangulo;
 import udec.prog2.project.util.Textura;
 import udec.prog2.project.util.Util;
@@ -34,7 +35,7 @@ public class JuegoScreen implements Screen {
     private final Color colorBotonMenuSide;
     private int menuSideActivado;
     private final ArrayList<Textura> texturasHabitats;
-    private final ArrayList<Habitat> habitats;
+    private final Habitat[] habitats;
     private final Textura texturaFlecha;
     private int indexHabitatSeleccionado;
     private boolean acabaDeSeleccionarHabitat;
@@ -42,9 +43,9 @@ public class JuegoScreen implements Screen {
     public JuegoScreen(ZooSimulator juego) {
         this.juego = juego;
 
-        this.menuHabitatScreen = new MenuHabitatScreen(juego);
-        this.menuAnimalesScreen = new MenuAnimalesScreen(juego);
-        this.menuComidaScreen = new MenuComidaScreen(juego);
+        this.menuHabitatScreen = new MenuHabitatScreen(juego, this);
+        this.menuAnimalesScreen = new MenuAnimalesScreen(juego, this);
+        this.menuComidaScreen = new MenuComidaScreen(juego, this);
 
         this.bordesFondoTile = new Rectangulo(juego.texturaPasto.getWidth(), juego.texturaPasto.getHeight());
         final float escalaFondo = (float) ZooSimulator.WIDTH / juego.texturaPasto.getWidth() / 9;
@@ -99,7 +100,7 @@ public class JuegoScreen implements Screen {
             }
         }
 
-        this.habitats = new ArrayList<>();
+        this.habitats = new Habitat[FILAS_HABITATS * COLUMANS_HABITATS];
         this.indexHabitatSeleccionado = -1;
         this.acabaDeSeleccionarHabitat = false;
         this.texturaFlecha = new Textura("ui/flecha.png");
@@ -178,7 +179,7 @@ public class JuegoScreen implements Screen {
 
         for (Textura texturaHabitat : this.texturasHabitats) {
             final int index = this.texturasHabitats.indexOf(texturaHabitat);
-            if (!texturaHabitat.bordes.contains(mousePos)) continue;
+            if (!texturaHabitat.bordes.contains(mousePos) || this.habitats[index] != null) continue;
 
             this.drawFlecha(index);
 
@@ -193,6 +194,15 @@ public class JuegoScreen implements Screen {
         if (this.indexHabitatSeleccionado == -1) return;
 
         this.drawFlecha(this.indexHabitatSeleccionado);
+    }
+
+    public void crearHabitat(TipoHabitat tipo) {
+        final int index = this.indexHabitatSeleccionado;
+        this.habitats[index] = tipo.crearHabitat(3);
+        Textura texturaHabitat = tipo.getTextura().clonar();
+        texturaHabitat.bordes.set(this.texturasHabitats.get(index).bordes);
+        this.texturasHabitats.get(index).dispose();
+        this.texturasHabitats.set(index, texturaHabitat);
     }
 
     private void drawFlecha(int indexHabitat) {

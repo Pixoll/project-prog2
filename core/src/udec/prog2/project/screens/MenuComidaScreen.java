@@ -4,8 +4,8 @@ import com.badlogic.gdx.math.Vector2;
 import udec.prog2.project.ZooSimulator;
 
 public class MenuComidaScreen extends MenuScreen {
-    public MenuComidaScreen(ZooSimulator juego) {
-        super(juego, "Comprar Comida");
+    public MenuComidaScreen(ZooSimulator juego, JuegoScreen juegoScreen) {
+        super(juego, juegoScreen, "Comprar Comida");
     }
 
     @Override

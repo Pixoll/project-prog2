@@ -23,4 +23,18 @@ public class Rectangulo extends Rectangle {
         this.y *= scale;
         return this;
     }
+
+    public Rectangulo toSquare() {
+        if (this.height > this.width) {
+            this.height = this.width;
+        } else {
+            this.width = this.height;
+        }
+        return this;
+    }
+
+    @Override
+    public Rectangulo clone() {
+        return new Rectangulo(this.x, this.y, this.width, this.height);
+    }
 }

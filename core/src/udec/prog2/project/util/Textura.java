@@ -14,6 +14,10 @@ public class Textura extends Texture {
         this.bordes = new Rectangulo(this.getWidth(), this.getHeight());
     }
 
+    public String getArchivoTextura() {
+        return this.archivoTextura;
+    }
+
     public Textura clonar() {
         final Textura clonada = new Textura(this.archivoTextura);
         clonada.bordes.set(this.bordes);
