@@ -16,11 +16,11 @@ import udec.prog2.project.habitats.Habitat;
 import java.util.ArrayList;
 
 public class JuegoScreen implements Screen {
-    private static final int BOTON_SIDE_HABITATS = 0;
-    private static final int BOTON_SIDE_ANIMALES = 1;
-    private static final int BOTON_SIDE_COMIDAS = 2;
-    private static final int BOTON_SIDE_MOVER = 3;
-    private static final int BOTON_SIDE_REMOVER = 4;
+    private static final int MENU_SIDE_HABITATS = 0;
+    private static final int MENU_SIDE_ANIMALES = 1;
+    private static final int MENU_SIDE_COMIDAS = 2;
+    private static final int MENU_SIDE_MOVER = 3;
+    private static final int MENU_SIDE_REMOVER = 4;
     private static final int CANTIDAD_BOTONES_SIDE = 5;
     private static final int FILAS_HABITATS = 3;
     private static final int COLUMANS_HABITATS = 4;
@@ -33,7 +33,7 @@ public class JuegoScreen implements Screen {
     private final ArrayList<Rectangle> bordesBotonesMenuSide;
     private final float botonMenuSideHoverWidth;
     private final Color colorBotonMenuSide;
-    private int menuSideActivado;
+    private int menuSideSeleccionado;
     private final ArrayList<Textura> texturasHabitats;
     private final Habitat[] habitats;
     private final Textura texturaFlecha;
@@ -74,7 +74,7 @@ public class JuegoScreen implements Screen {
         }
 
         this.botonMenuSideHoverWidth = bordesBotonMenuSide.width * 0.1f;
-        this.menuSideActivado = -1;
+        this.menuSideSeleccionado = -1;
 
         final Rectangle bordesSeccionHabitats = new Rectangle();
         bordesSeccionHabitats.height = ZooSimulator.HEIGHT * 0.9f;
@@ -132,22 +132,22 @@ public class JuegoScreen implements Screen {
         final Vector2 mousePos = this.getMousePos();
         for (int i = 0; i < CANTIDAD_BOTONES_SIDE; i++) {
             final Rectangle bordesBoton = this.bordesBotonesMenuSide.get(i);
-            if (!bordesBoton.contains(mousePos) && this.menuSideActivado != i) continue;
+            if (!bordesBoton.contains(mousePos) && this.menuSideSeleccionado != i) continue;
 
             this.juego.shape.rect(bordesBoton, this.botonMenuSideHoverWidth);
 
             if (bordesBoton.contains(mousePos) && Gdx.input.justTouched()) {
-                this.menuSideActivado = this.menuSideActivado == i ? -1 : i;
+                this.menuSideSeleccionado = this.menuSideSeleccionado == i ? -1 : i;
             }
         }
         this.juego.shape.end();
 
-        if (this.menuSideActivado == -1) {
+        if (this.menuSideSeleccionado == -1) {
             this.indexHabitatSeleccionado = -1;
             return;
         }
 
-        if (this.menuSideActivado < 0 || this.menuSideActivado >= CANTIDAD_BOTONES_SIDE) return;
+        if (this.menuSideSeleccionado < 0 || this.menuSideSeleccionado >= CANTIDAD_BOTONES_SIDE) return;
 
         if (this.indexHabitatSeleccionado == -1) {
             this.seleccionarHabitat(mousePos);
@@ -160,13 +160,16 @@ public class JuegoScreen implements Screen {
         this.drawFlecha(this.indexHabitatSeleccionado);
 
         boolean mantenerMenuAbierto = false;
-        switch (this.menuSideActivado) {
-            case BOTON_SIDE_HABITATS -> mantenerMenuAbierto = this.menuHabitatScreen.draw(mousePos, this.acabaDeSeleccionarHabitat);
-            case BOTON_SIDE_ANIMALES -> mantenerMenuAbierto = this.menuAnimalesScreen.draw(mousePos, this.acabaDeSeleccionarHabitat);
-            case BOTON_SIDE_COMIDAS -> mantenerMenuAbierto = this.menuComidaScreen.draw(mousePos, this.acabaDeSeleccionarHabitat);
-            default -> System.out.println(this.menuSideActivado + " not implemented");
-//            case BOTON_SIDE_MOVER -> this.menuMover(mousePos);
-//            case BOTON_SIDE_REMOVER -> this.menuRemover(mousePos);
+        switch (this.menuSideSeleccionado) {
+            case MENU_SIDE_HABITATS ->
+                    mantenerMenuAbierto = this.menuHabitatScreen.draw(mousePos, this.acabaDeSeleccionarHabitat);
+            case MENU_SIDE_ANIMALES ->
+                    mantenerMenuAbierto = this.menuAnimalesScreen.draw(mousePos, this.acabaDeSeleccionarHabitat);
+            case MENU_SIDE_COMIDAS ->
+                    mantenerMenuAbierto = this.menuComidaScreen.draw(mousePos, this.acabaDeSeleccionarHabitat);
+//            case MENU_SIDE_MOVER -> this.menuMover(mousePos);
+            case MENU_SIDE_REMOVER -> mantenerMenuAbierto = this.menuRemover();
+            default -> System.out.println(this.menuSideSeleccionado + " not implemented");
         }
 
         if (!mantenerMenuAbierto) {
@@ -174,12 +177,26 @@ public class JuegoScreen implements Screen {
         }
     }
 
+    public boolean menuRemover() {
+        final int index = this.indexHabitatSeleccionado;
+        this.habitats[index] = null;
+        final Textura texturaHabitat = new Textura("habitats/vacio.png");
+        texturaHabitat.bordes.set(this.texturasHabitats.get(index).bordes);
+        this.texturasHabitats.get(index).dispose();
+        this.texturasHabitats.set(index, texturaHabitat);
+        return false;
+    }
+
     private void seleccionarHabitat(Vector2 mousePos) {
         final boolean click = Gdx.input.justTouched();
 
         for (Textura texturaHabitat : this.texturasHabitats) {
             final int index = this.texturasHabitats.indexOf(texturaHabitat);
-            if (!texturaHabitat.bordes.contains(mousePos) || this.habitats[index] != null) continue;
+            if (!texturaHabitat.bordes.contains(mousePos)) continue;
+
+            final boolean tieneHabitat = this.habitats[index] != null;
+            if (tieneHabitat && this.menuSideSeleccionado == MENU_SIDE_HABITATS) continue;
+            if (!tieneHabitat && this.menuSideSeleccionado != MENU_SIDE_HABITATS) continue;
 
             this.drawFlecha(index);
 
@@ -203,6 +220,11 @@ public class JuegoScreen implements Screen {
         texturaHabitat.bordes.set(this.texturasHabitats.get(index).bordes);
         this.texturasHabitats.get(index).dispose();
         this.texturasHabitats.set(index, texturaHabitat);
+    }
+
+    public Habitat getHabitatSeleccionado() {
+        if (this.indexHabitatSeleccionado == -1) return null;
+        return this.habitats[this.indexHabitatSeleccionado];
     }
 
     private void drawFlecha(int indexHabitat) {

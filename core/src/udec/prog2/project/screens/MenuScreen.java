@@ -5,18 +5,26 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
 import udec.prog2.project.ZooSimulator;
 import udec.prog2.project.util.Rectangulo;
+import udec.prog2.project.util.Textura;
 import udec.prog2.project.util.Util;
+
+import java.util.function.Function;
 
 public class MenuScreen {
     protected final ZooSimulator juego;
     protected final JuegoScreen juegoScreen;
     protected final Rectangulo bordesContenidos;
+    protected final BitmapFont fuenteTituloTipo;
+    protected final Rectangulo[] bordesTituloTipo;
+    protected final Color colorSeleccionarTipo;
+    protected final float seleccionarTipoHoverWidth;
+    protected final Rectangulo[] bordesTipo;
     private final Rectangulo bordesMenu;
     private final Texture texturaMenu;
     private final Color colorFondo;
@@ -26,7 +34,7 @@ public class MenuScreen {
     private final Rectangle bordesTituloMenu;
     private final Color colorFondoContenidos;
 
-    public MenuScreen(ZooSimulator juego, JuegoScreen juegoScreen, String tituloMenu) {
+    public <T> MenuScreen(ZooSimulator juego, JuegoScreen juegoScreen, String tituloMenu, T[] tipos, Function<T, Textura> texturaGetter) {
         this.juego = juego;
         this.juegoScreen = juegoScreen;
         this.tituloMenu = tituloMenu;
@@ -48,7 +56,7 @@ public class MenuScreen {
 
         this.colorFondo = Util.color("#000000", 0.5f);
 
-        FreeTypeFontGenerator.FreeTypeFontParameter configFuente = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        FreeTypeFontParameter configFuente = new FreeTypeFontParameter();
         configFuente.size = 30;
         configFuente.borderColor = this.colorFondo;
         configFuente.borderWidth = 2;
@@ -58,6 +66,75 @@ public class MenuScreen {
         this.bordesTituloMenu.width = ZooSimulator.WIDTH / 2f;
         this.bordesTituloMenu.x = ZooSimulator.WIDTH / 4f;
         this.bordesTituloMenu.y = this.bordesMenu.y + this.bordesMenu.height * 0.925f;
+
+        final int cantidadTipos = tipos.length;
+        final double sqrtCantidadTipos = Math.sqrt(cantidadTipos);
+        final int filas = (int) (Math.floor(sqrtCantidadTipos) == sqrtCantidadTipos
+                ? Math.ceil(sqrtCantidadTipos / 2)
+                : Math.floor(sqrtCantidadTipos));
+        int columnas = cantidadTipos / filas;
+        if (filas * columnas < cantidadTipos) columnas++;
+
+        final Rectangulo bordeTipo = this.bordesContenidos.clone();
+        bordeTipo.width /= columnas;
+        bordeTipo.height /= filas;
+        bordeTipo.y += this.bordesContenidos.height - bordeTipo.height;
+
+        this.bordesTipo = new Rectangulo[cantidadTipos];
+        for (int i = 0; i < filas; i++) {
+            for (int j = 0; j < columnas; j++) {
+                final int k = i * columnas + j;
+                if (k >= cantidadTipos) continue;
+
+                final Rectangulo kBordeTipo = bordeTipo.clone();
+                kBordeTipo.x += j * bordeTipo.width;
+                kBordeTipo.y -= i * bordeTipo.height;
+                this.bordesTipo[k] = kBordeTipo;
+            }
+        }
+
+        final Rectangulo bordesIconoTipo = bordeTipo.clone().toSquare().scaleBy(0.5f);
+        bordesIconoTipo.x = bordeTipo.x + (bordeTipo.width - bordesIconoTipo.width) / 2;
+        bordesIconoTipo.y = bordeTipo.y + bordeTipo.height * 0.85f - bordesIconoTipo.height;
+
+        for (int i = 0; i < filas; i++) {
+            for (int j = 0; j < columnas; j++) {
+                final int k = i * columnas + j;
+                if (k >= cantidadTipos) continue;
+
+                final Textura texturaTipo = texturaGetter.apply(tipos[k]);
+                texturaTipo.bordes.set(bordesIconoTipo);
+
+                texturaTipo.bordes.x += j * bordeTipo.width;
+                texturaTipo.bordes.y -= i * bordeTipo.height;
+            }
+        }
+
+        configFuente.size = 20;
+        configFuente.borderColor = Util.color("#000000", 0.5f);
+        configFuente.borderWidth = 1;
+        this.fuenteTituloTipo = this.juego.generadorFuente.generateFont(configFuente);
+
+        final Rectangulo templateBordeTituloTipo = bordeTipo.clone();
+        templateBordeTituloTipo.width *= 0.9f;
+        templateBordeTituloTipo.x += bordeTipo.width * 0.05f;
+        templateBordeTituloTipo.y -= (bordesIconoTipo.height - bordeTipo.height) / 2;
+
+        this.bordesTituloTipo = new Rectangulo[cantidadTipos];
+        for (int i = 0; i < filas; i++) {
+            for (int j = 0; j < columnas; j++) {
+                final int k = i * columnas + j;
+                if (k >= cantidadTipos) continue;
+
+                final Rectangulo bordeTituloHabitat = templateBordeTituloTipo.clone();
+                bordeTituloHabitat.x += j * bordeTipo.width;
+                bordeTituloHabitat.y -= i * bordeTipo.height;
+                this.bordesTituloTipo[k] = bordeTituloHabitat;
+            }
+        }
+
+        this.colorSeleccionarTipo = Util.color("#689a24");
+        this.seleccionarTipoHoverWidth = bordeTipo.width * 0.025f;
     }
 
     public boolean draw(Vector2 mousePos, boolean ignorarClick) {
@@ -95,5 +172,6 @@ public class MenuScreen {
     public void dispose() {
         this.texturaMenu.dispose();
         this.fuenteTituloMenu.dispose();
+        this.fuenteTituloTipo.dispose();
     }
 }
