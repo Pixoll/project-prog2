@@ -22,6 +22,14 @@ public class Rectangulo extends Rectangle {
         return (Rectangulo) super.setPosition(position);
     }
 
+    public Vector2 getCenter() {
+        return super.getCenter(new Vector2());
+    }
+
+    public Vector2 getPosition() {
+        return super.getPosition(new Vector2());
+    }
+
     public Rectangulo setPosition(Rectangulo rectangulo) {
         this.x = rectangulo.x;
         this.y = rectangulo.y;
