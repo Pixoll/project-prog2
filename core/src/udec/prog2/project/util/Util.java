@@ -15,8 +15,8 @@ public class Util {
         return Util.color(hexColor, 1);
     }
 
-    public static void setTimeout(Runnable funcion, long delay) {
-        new Thread(() -> {
+    public static Thread setTimeout(Runnable funcion, long delay) {
+        final Thread thread = new Thread(() -> {
             try {
                 Thread.sleep(delay);
             } catch (Exception error) {
@@ -24,7 +24,9 @@ public class Util {
             }
 
             funcion.run();
-        }).start();
+        });
+        thread.start();
+        return thread;
     }
 
     public static float getRandomNumber(float min, float max) {

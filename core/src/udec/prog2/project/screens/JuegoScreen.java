@@ -22,9 +22,8 @@ public class JuegoScreen implements Screen {
     private static final int MENU_SIDE_HABITATS = 0;
     private static final int MENU_SIDE_ANIMALES = 1;
     private static final int MENU_SIDE_COMIDAS = 2;
-    private static final int MENU_SIDE_MOVER = 3;
-    private static final int MENU_SIDE_REMOVER = 4;
-    private static final int CANTIDAD_BOTONES_SIDE = 5;
+    private static final int MENU_SIDE_REMOVER = 3;
+    private static final int CANTIDAD_BOTONES_SIDE = 4;
     private static final int FILAS_HABITATS = 3;
     private static final int COLUMNAS_HABITATS = 4;
     private static final int TOTAL_HABITATS = FILAS_HABITATS * COLUMNAS_HABITATS;
@@ -152,7 +151,7 @@ public class JuegoScreen implements Screen {
             for (Textura texturaAnimal : this.texturasAnimales[i]) {
                 final int indexAnimal = this.texturasAnimales[i].indexOf(texturaAnimal);
                 final DestinacionAnimal destinacionAnimal = this.destinacionAnimales[i].get(indexAnimal);
-                if (!texturaAnimal.bordes.getPosition().epsilonEquals(destinacionAnimal.destinacion, 1f)) {
+                if (!texturaAnimal.bordes.getPosition().epsilonEquals(destinacionAnimal.destinacion, 2f)) {
                     texturaAnimal.bordes.x += destinacionAnimal.getDeltaX() * delta;
                     texturaAnimal.bordes.y += destinacionAnimal.getDeltaY() * delta;
                 } else {
@@ -216,7 +215,6 @@ public class JuegoScreen implements Screen {
                     mantenerMenuAbierto = this.menuAnimalesScreen.draw(mousePos, this.acabaDeSeleccionarHabitat);
             case MENU_SIDE_COMIDAS ->
                     mantenerMenuAbierto = this.menuComidaScreen.draw(mousePos, this.acabaDeSeleccionarHabitat);
-//            case MENU_SIDE_MOVER -> this.menuMover(mousePos);
             case MENU_SIDE_REMOVER -> mantenerMenuAbierto = this.menuRemover();
             default -> System.out.println(this.menuSideSeleccionado + " not implemented");
         }
@@ -235,6 +233,7 @@ public class JuegoScreen implements Screen {
         this.texturasHabitats.set(index, texturaHabitat);
         this.texturasAnimales[index].forEach(Textura::dispose);
         this.texturasAnimales[index].clear();
+        this.destinacionAnimales[index].clear();
         return false;
     }
 
@@ -301,11 +300,12 @@ public class JuegoScreen implements Screen {
 
     public void addComidaToHabitat(TipoComida tipo) {
         final int index = this.indexHabitatSeleccionado;
-        boolean success = this.habitats[index].depositarComida(tipo);
-        if (!success) return;
+        this.habitats[index].depositarComida(tipo);
     }
 
     private void moverAnimalRandom(int indexHabitat, int indexAnimal) {
+        if (this.destinacionAnimales[indexHabitat].isEmpty()) return;
+
         final DestinacionAnimal destinacion = this.destinacionAnimales[indexHabitat].get(indexAnimal);
         final Rectangulo bordesHabitat = this.texturasHabitats.get(indexHabitat).bordes;
         final Rectangulo bordesAnimal = this.texturasAnimales[indexHabitat].get(indexAnimal).bordes;
